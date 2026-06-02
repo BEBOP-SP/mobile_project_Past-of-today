@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">TimePop (과거의 오늘)</string>
+
+    <!-- 메인 대시보드 UI -->
+    <string name="main_header_title">과거의 오늘</string>
+    <string name="main_header_subtitle">TimePop</string>
+    <string name="main_greeting">안녕하세요, %1$s님!\n당신의 오늘을 발견해보세요.</string>
+    <string name="section_interest_match">당신의 관심사 맞춤 (#70%%)</string>
+    <string name="section_new_discovery">당신의 새로운 발견 (#30%%)</string>
+
+    <!-- 팝업 화면 UI -->
+    <string name="popup_title">과거의 오늘</string>
+    <string name="btn_scrap">스크랩하기</string>
+    <string name="btn_learn_more">더 알아보기</string>
+
+    <!-- 스크랩 보관함 UI -->
+    <string name="scrap_title">나만의 상식 노트</string>
+    <string name="filter_all">모두</string>
+    <string name="filter_history">역사</string>
+    <string name="filter_science">과학</string>
+    <string name="filter_economy">경제</string>
+    <string name="scrap_date_label">스크랩 날짜: %1$s</string>
+
+    <!-- 역사 아이템 포맷 -->
+    <string name="history_item_format">%1$d: %2$s</string>
+
+    <!-- 하단 네비게이션 -->
+    <string name="nav_home">홈</string>
+    <string name="nav_scrap">스크랩</string>
+    <string name="nav_settings">설정</string>
+</resources>

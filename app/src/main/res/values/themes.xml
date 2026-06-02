@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.TodayInHistory" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">#D4A017</item>
+        <item name="colorPrimaryVariant">#B48A12</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">#333333</item>
+        <item name="colorSecondaryVariant">#000000</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+    </style>
+
+    <!-- 이미지 둥근 모서리 스타일 -->
+    <style name="RoundedImageView" parent="">
+        <item name="cornerSize">12dp</item>
+    </style>
+</resources>

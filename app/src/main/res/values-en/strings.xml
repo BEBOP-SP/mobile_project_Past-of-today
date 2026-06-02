@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">TimePop</string>
+
+    <!-- Main Dashboard UI -->
+    <string name="main_header_title">On This Day</string>
+    <string name="main_header_subtitle">TimePop</string>
+    <string name="main_greeting">Hello, %1$s!\nDiscover your today.</string>
+    <string name="section_interest_match">Tailored to your interests (#70%%)</string>
+    <string name="section_new_discovery">New discoveries for you (#30%%)</string>
+
+    <!-- Pop-up Screen UI -->
+    <string name="popup_title">On This Day</string>
+    <string name="btn_scrap">Scrap It</string>
+    <string name="btn_learn_more">Learn More</string>
+
+    <!-- Scrap Storage UI -->
+    <string name="scrap_title">My Knowledge Note</string>
+    <string name="filter_all">All</string>
+    <string name="filter_history">History</string>
+    <string name="filter_science">Science</string>
+    <string name="filter_economy">Economy</string>
+    <string name="scrap_date_label">Scrapped on: %1$s</string>
+
+    <!-- History Item Format -->
+    <string name="history_item_format">%1$d: %2$s</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_scrap">Scrap</string>
+    <string name="nav_settings">Settings</string>
+</resources>
