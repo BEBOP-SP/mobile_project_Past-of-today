@@ -1,0 +1,76 @@
+<resources>
+    <string name="app_name">TimePop</string>
+
+    <!-- Main Dashboard UI -->
+    <string name="main_header_title">On This Day</string>
+    <string name="main_header_subtitle">TimePop</string>
+    <string name="main_greeting">Hello, %1$s!\nDiscover your today.</string>
+    <string name="main_loading">Loading today\'s history&#8230;</string>
+    <string name="section_interest_match">Tailored to your interests (#70%%)</string>
+    <string name="section_new_discovery">New discoveries for you (#30%%)</string>
+
+    <!-- Pop-up Screen UI -->
+    <string name="popup_title">On This Day</string>
+    <string name="btn_scrap">Scrap It</string>
+    <string name="btn_learn_more">Learn More</string>
+
+    <!-- Scrap Storage UI -->
+    <string name="scrap_title">My Knowledge Note</string>
+    <string name="filter_all">All</string>
+    <string name="filter_history">History</string>
+    <string name="filter_science">Science</string>
+    <string name="filter_economy">Economy</string>
+    <string name="scrap_date_label">Scrapped on: %1$s</string>
+    <string name="scrap_empty_msg">No scrapped events yet.</string>
+
+    <!-- History Item Format -->
+    <string name="history_item_format">%1$d: %2$s</string>
+
+    <!-- Category Selection -->
+    <string name="category_title">Welcome! Tell us your name</string>
+    <string name="category_nickname_hint">Nickname or Name</string>
+    <string name="category_subtitle">We will recommend today\'s events\nbased on your interests.</string>
+    <!-- Category Selection Subdivided -->
+    <string name="category_war">War/Military</string>
+    <string name="category_people">Great Figures</string>
+    <string name="category_politics">Revolution/Politics</string>
+    <string name="category_ancient">Ancient/Ruins</string>
+    <string name="category_space">Space/Astronomy</string>
+    <string name="category_nuclear">Nuclear/Energy</string>
+    <string name="category_it">IT/AI</string>
+    <string name="category_medicine">Medicine/Discovery</string>
+    <string name="category_music">Music/Performance</string>
+    <string name="category_movie">Movie/Entertainment</string>
+    <string name="category_art_design">Art/Design</string>
+    <string name="category_literature">Literature/Philosophy</string>
+    <string name="category_sports_game">Sports/Match</string>
+    <string name="category_olympic">Olympics</string>
+    <string name="category_business">Economy/Business</string>
+
+    <string name="category_btn_start">Get Started</string>
+    <string name="category_error_nickname_empty">Please enter your nickname.</string>
+    <string name="category_select_at_least_one">Please select at least one interest.</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">Welcome!\nReady to record today?</string>
+    <string name="login_email_hint">Email Address</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_password_confirm_hint">Confirm Password</string>
+    <string name="login_btn_signin">Sign In</string>
+    <string name="login_no_account">Don\'t have an account? </string>
+    <string name="login_go_signup">Sign Up</string>
+    <string name="login_error_empty">Please enter both email and password.</string>
+    <string name="login_error_password_mismatch">Passwords do not match.</string>
+    <string name="login_success">Login Successful!</string>
+
+    <!-- Signup Screen -->
+    <string name="signup_title">New Start\nCreate your account.</string>
+    <string name="signup_btn_submit">Complete Sign Up</string>
+    <string name="signup_success">Signup completed successfully!</string>
+    <string name="signup_go_login">Already have an account? Log In</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_scrap">Scrap</string>
+    <string name="nav_settings">Settings</string>
+</resources>
