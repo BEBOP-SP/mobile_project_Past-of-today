@@ -23,6 +23,7 @@ import mnu.sofware.todayinhistory.api.RetrofitClient
 import mnu.sofware.todayinhistory.api.TranslationManager
 import mnu.sofware.todayinhistory.databinding.ActivityMainBinding
 import mnu.sofware.todayinhistory.db.MySqlDatabaseManager
+import mnu.sofware.todayinhistory.service.ScreenService
 import java.util.Calendar
 import java.util.Locale
 
@@ -50,6 +51,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         initRecyclerViews()
         initBottomNavigation()
+        
+        // [교수님 조건] 팝업 서비스 시작 (화면 켬 감지)
+        startScreenService()
+        checkOverlayPermission()
         
         // 초기 언어 설정에 맞춰 UI 텍스트 초기화
         updateUITexts()
@@ -104,6 +109,31 @@ class MainActivity : AppCompatActivity() {
             bottomNav.menu.findItem(R.id.nav_home).title = langContext.getString(R.string.nav_home)
             bottomNav.menu.findItem(R.id.nav_scrap).title = langContext.getString(R.string.nav_scrap)
             bottomNav.menu.findItem(R.id.nav_settings).title = langContext.getString(R.string.nav_settings)
+        }
+    }
+
+    /**
+     * [교수님 조건] 안드로이드 10 이상에서 백그라운드 팝업을 띄우기 위해 '다른 앱 위에 표시' 권한을 확인합니다.
+     */
+    private fun checkOverlayPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            if (!android.provider.Settings.canDrawOverlays(this)) {
+                val intent = Intent(
+                    android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+                startActivity(intent)
+                Toast.makeText(this, "팝업 기능을 위해 '다른 앱 위에 표시' 권한이 필요합니다.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun startScreenService() {
+        val serviceIntent = Intent(this, ScreenService::class.java)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
         }
     }
 
@@ -287,14 +317,31 @@ class MainActivity : AppCompatActivity() {
      * [교수님 조건] 클릭(위키 이동) 및 길게 누르기(스크랩) 기능을 구현합니다.
      */
     private fun initRecyclerViews() {
-        // 공통 클릭 핸들러: 위키피디아 주소로 이동
+        // [수정] 한국어 모드일 때 한국어 위키피디아 자동 연결 및 폴백 처리
         val onEventClick: (HistoryEvent) -> Unit = { event ->
-            val url = event.pages?.firstOrNull()?.contentUrls?.desktop?.page
-            if (!url.isNullOrEmpty()) {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
-            } else {
+            val page = event.pages?.firstOrNull()
+            val enUrl = page?.contentUrls?.desktop?.page
+            val enTitle = page?.title // WikipediaArticle 모델의 title 필드 사용
+
+            if (enUrl.isNullOrEmpty()) {
                 Toast.makeText(this, "상세 페이지 정보가 없습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                if (currentLang == "ko" && !enTitle.isNullOrEmpty()) {
+                    // 한국어 모드: 한국어 문서 존재 여부 확인
+                    lifecycleScope.launch {
+                        val koUrl = TranslationManager.getKoreanWikipediaUrl(enTitle)
+                        if (koUrl != null) {
+                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(koUrl)))
+                        } else {
+                            // 한국어 문서가 없으면 영어로 연결
+                            Toast.makeText(this@MainActivity, "한국어 문서가 없어 영문 페이지로 연결합니다.", Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(enUrl)))
+                        }
+                    }
+                } else {
+                    // 영어 모드이거나 제목이 없는 경우 바로 영문 연결
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(enUrl)))
+                }
             }
         }
 

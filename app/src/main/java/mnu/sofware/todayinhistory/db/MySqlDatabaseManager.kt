@@ -32,6 +32,55 @@ object MySqlDatabaseManager {
     }
 
     /**
+     * 회원가입: 새로운 사용자를 DB에 등록합니다.
+     */
+    suspend fun registerUser(uid: String, email: String, password: String): Boolean = withContext(Dispatchers.IO) {
+        val query = "INSERT INTO users (uid, email, password) VALUES (?, ?, ?)"
+        return@withContext try {
+            val conn = getConnection() ?: return@withContext false
+            val pstmt = conn.prepareStatement(query)
+            pstmt.setString(1, uid)
+            pstmt.setString(2, email)
+            pstmt.setString(3, password) // [주의] 실제 서비스에서는 해싱 필수
+            val result = pstmt.executeUpdate()
+            conn.close()
+            result > 0
+        } catch (e: Exception) {
+            Log.e("MySQL", "회원가입 에러: ${e.message}")
+            false
+        }
+    }
+
+    /**
+     * 로그인: 이메일과 비밀번호가 일치하는 유저 정보를 가져옵니다.
+     */
+    suspend fun loginUser(email: String, password: String): Map<String, String>? = withContext(Dispatchers.IO) {
+        val query = "SELECT * FROM users WHERE email = ? AND password = ?"
+        try {
+            val conn = getConnection() ?: return@withContext null
+            val pstmt = conn.prepareStatement(query)
+            pstmt.setString(1, email)
+            pstmt.setString(2, password)
+            val rs = pstmt.executeQuery()
+
+            if (rs.next()) {
+                val userData = mapOf(
+                    "uid" to rs.getString("uid"),
+                    "email" to rs.getString("email"),
+                    "nickname" to (rs.getString("nickname") ?: ""),
+                    "interests" to (rs.getString("interests") ?: "")
+                )
+                conn.close()
+                return@withContext userData
+            }
+            conn.close()
+        } catch (e: Exception) {
+            Log.e("MySQL", "로그인 에러: ${e.message}")
+        }
+        return@withContext null
+    }
+
+    /**
      * 사용자 닉네임과 관심사를 DB에 저장합니다.
      * [방어적 코딩] 네트워크 오류 발생 시 false를 반환합니다.
      */
