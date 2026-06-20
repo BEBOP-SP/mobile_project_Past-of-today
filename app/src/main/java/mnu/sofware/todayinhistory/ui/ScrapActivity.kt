@@ -2,6 +2,7 @@ package mnu.sofware.todayinhistory.ui
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -71,6 +72,28 @@ class ScrapActivity : AppCompatActivity() {
         scrapAdapter = ScrapAdapter(
             onDeleteClick = { scrapId ->
                 deleteScrap(scrapId)
+            },
+            onItemClick = { wikiUrl ->
+                // [수정] 한국어 모드일 경우 한국어 위키피디아 존재 여부 확인 후 이동
+                lifecycleScope.launch {
+                    var targetUrl = wikiUrl
+                    
+                    // 영어 위키 주소이고 현재 한국어 설정인 경우
+                    if (currentLang == "ko" && wikiUrl.contains("en.wikipedia.org")) {
+                        val enTitle = wikiUrl.substringAfterLast("/")
+                        val koUrl = mnu.sofware.todayinhistory.api.TranslationManager.getKoreanWikipediaUrl(enTitle)
+                        if (koUrl != null) {
+                            targetUrl = koUrl
+                        }
+                    }
+
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Toast.makeText(this@ScrapActivity, "페이지를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         )
         binding.rvScrapList.apply {

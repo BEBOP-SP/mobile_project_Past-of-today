@@ -4,6 +4,8 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.view.MotionEvent
+import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -59,8 +61,32 @@ class PopupActivity : AppCompatActivity() {
     }
 
     private fun initListeners() {
-        binding.btnPopupClose.setOnClickListener { finish() }
+        // [잠금화면 구현] 아래쪽 영역을 스와이프하거나 클릭하면 닫히도록 설정 (잠금 해제 흉내)
+        binding.btnPopupClose.setOnClickListener { 
+            finish() 
+        }
         
+        // 투명 버튼 위에서 스와이프 액션 감지 (간단한 예시)
+        binding.btnPopupClose.setOnTouchListener(object : View.OnTouchListener {
+            private var startY: Float = 0f
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                when (event?.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        startY = event.y
+                        return true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        val endY = event.y
+                        if (startY - endY > 100) { // 위로 스와이프
+                            finish()
+                        }
+                    }
+                }
+                v?.performClick()
+                return false
+            }
+        })
+
         binding.btnPopupScrap.setOnClickListener {
             currentEvent?.let { event ->
                 saveScrap(event)
@@ -135,7 +161,8 @@ class PopupActivity : AppCompatActivity() {
                 uid, 
                 event.year ?: 0, 
                 event.text ?: "", 
-                event.pages?.firstOrNull()?.thumbnail?.source
+                event.pages?.firstOrNull()?.thumbnail?.source,
+                event.pages?.firstOrNull()?.contentUrls?.desktop?.page
             )
             if (success) {
                 Toast.makeText(this@PopupActivity, "보관함에 저장되었습니다!", Toast.LENGTH_SHORT).show()

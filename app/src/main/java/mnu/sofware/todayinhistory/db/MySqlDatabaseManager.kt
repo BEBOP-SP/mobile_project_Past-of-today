@@ -113,35 +113,46 @@ object MySqlDatabaseManager {
     
     /**
      * 사용자가 선택한 사건을 스크랩(저장)합니다.
-     * [방어적 코딩] 이미 스크랩된 항목은 무시하거나 업데이트합니다.
+     * [방어적 코딩] wiki_url 컬럼이 DB에 없는 경우를 대비해 2단계로 시도합니다.
      */
-    suspend fun saveScrap(uid: String, year: Int, text: String, imageUrl: String?): Boolean = withContext(Dispatchers.IO) {
-        val query = """
-            INSERT INTO scraps (uid, event_year, event_text, image_url) 
-            VALUES (?, ?, ?, ?)
-        """.trimIndent()
+    suspend fun saveScrap(uid: String, year: Int, text: String, imageUrl: String?, wikiUrl: String?): Boolean = withContext(Dispatchers.IO) {
+        val queryWithWiki = "INSERT INTO scraps (uid, event_year, event_text, image_url, wiki_url) VALUES (?, ?, ?, ?, ?)"
+        val queryWithoutWiki = "INSERT INTO scraps (uid, event_year, event_text, image_url) VALUES (?, ?, ?, ?)"
 
         return@withContext try {
             val conn = getConnection() ?: return@withContext false
-            val pstmt: PreparedStatement = conn.prepareStatement(query)
             
-            pstmt.setString(1, uid)
-            pstmt.setInt(2, year)
-            pstmt.setString(3, text)
-            pstmt.setString(4, imageUrl ?: "")
+            // 1차 시도: wiki_url 포함하여 저장
+            val success = try {
+                val pstmt = conn.prepareStatement(queryWithWiki)
+                pstmt.setString(1, uid)
+                pstmt.setInt(2, year)
+                pstmt.setString(3, text)
+                pstmt.setString(4, imageUrl ?: "")
+                pstmt.setString(5, wikiUrl ?: "")
+                pstmt.executeUpdate() > 0
+            } catch (e: Exception) {
+                // 2차 시도: 실패 시(컬럼 부재 등) wiki_url 제외하고 저장
+                Log.w("MySQL", "wiki_url 저장 실패, 이전 형식으로 재시도합니다.")
+                val pstmt = conn.prepareStatement(queryWithoutWiki)
+                pstmt.setString(1, uid)
+                pstmt.setInt(2, year)
+                pstmt.setString(3, text)
+                pstmt.setString(4, imageUrl ?: "")
+                pstmt.executeUpdate() > 0
+            }
             
-            val result = pstmt.executeUpdate()
             conn.close()
-            result > 0
+            success
         } catch (e: Exception) {
-            Log.e("MySQL", "스크랩 저장 에러: ${e.message}")
+            Log.e("MySQL", "스크랩 저장 최종 에러: ${e.message}")
             false
         }
     }
 
     /**
      * 특정 유저가 저장한 모든 스크랩 목록을 가져옵니다.
-     * [교수님 조건] RecyclerView에 뿌려주기 위한 데이터 리스트를 반환합니다.
+     * [방어적 코딩] wiki_url 컬럼 존재 여부를 확인하며 안전하게 데이터를 가져옵니다.
      */
     suspend fun getScrappedEvents(uid: String): List<Map<String, Any>> = withContext(Dispatchers.IO) {
         val scrapList = mutableListOf<Map<String, Any>>()
@@ -153,12 +164,24 @@ object MySqlDatabaseManager {
             pstmt.setString(1, uid)
             val rs = pstmt.executeQuery()
 
+            // 컬럼 인덱스 확인 (에러 방지)
+            val metaData = rs.metaData
+            val columnCount = metaData.columnCount
+            var hasWikiUrlColumn = false
+            for (i in 1..columnCount) {
+                if (metaData.getColumnName(i).equals("wiki_url", ignoreCase = true)) {
+                    hasWikiUrlColumn = true
+                    break
+                }
+            }
+
             while (rs.next()) {
                 scrapList.add(mapOf(
                     "id" to rs.getInt("id"),
                     "year" to rs.getInt("event_year"),
                     "text" to rs.getString("event_text"),
                     "imageUrl" to rs.getString("image_url"),
+                    "wikiUrl" to if (hasWikiUrlColumn) (rs.getString("wiki_url") ?: "") else "",
                     "createdAt" to rs.getTimestamp("created_at").toString()
                 ))
             }

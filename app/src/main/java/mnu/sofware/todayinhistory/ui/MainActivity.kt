@@ -354,8 +354,9 @@ class MainActivity : AppCompatActivity() {
                 val year = event.year ?: 0
                 val text = event.text ?: ""
                 val imageUrl = event.pages?.firstOrNull()?.thumbnail?.source
+                val wikiUrl = event.pages?.firstOrNull()?.contentUrls?.desktop?.page
                 
-                val success = MySqlDatabaseManager.saveScrap(uid, year, text, imageUrl)
+                val success = MySqlDatabaseManager.saveScrap(uid, year, text, imageUrl, wikiUrl)
                 if (success) {
                     Toast.makeText(this@MainActivity, "보관함에 저장되었습니다!", Toast.LENGTH_SHORT).show()
                 } else {

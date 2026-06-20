@@ -32,7 +32,8 @@
             android:exported="false"
             android:showForAllUsers="true"
             android:showOnLockScreen="true"
-            android:theme="@style/Theme.TodayInHistory.Translucent" />
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.TodayInHistory.LockScreen" />
 
         <!-- 팝업 서비스 등록 -->
         <service

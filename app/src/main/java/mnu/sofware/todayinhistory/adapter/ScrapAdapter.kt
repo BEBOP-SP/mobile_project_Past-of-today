@@ -10,9 +10,12 @@ import mnu.sofware.todayinhistory.databinding.ItemScrapListBinding
 /**
  * 사용자가 스크랩한 사건 목록을 표시하는 어댑터
  * [교수님 조건] RecyclerView 및 커스텀 어댑터 필수 적용.
+ * @param onDeleteClick 삭제 버튼 클릭 시 실행할 콜백
+ * @param onItemClick 아이템 클릭 시 실행할 콜백 (상세 페이지 이동)
  */
 class ScrapAdapter(
-    private val onDeleteClick: (Int) -> Unit
+    private val onDeleteClick: (Int) -> Unit,
+    private val onItemClick: (String) -> Unit
 ) : RecyclerView.Adapter<ScrapAdapter.ViewHolder>() {
 
     private var items: List<Map<String, Any>> = emptyList()
@@ -41,6 +44,7 @@ class ScrapAdapter(
             val year = item["year"] as Int
             val text = item["text"] as String
             val imageUrl = item["imageUrl"] as? String
+            val wikiUrl = item["wikiUrl"] as? String ?: ""
             val createdAt = item["createdAt"] as? String ?: ""
 
             // "1987년: 제목" 형식으로 표시
@@ -68,6 +72,19 @@ class ScrapAdapter(
             // 삭제 버튼
             binding.btnDeleteScrap.setOnClickListener {
                 onDeleteClick(id)
+            }
+
+            // [수정] 카드 클릭 시 위키피디아 이동 및 피드백 추가
+            binding.root.setOnClickListener {
+                if (wikiUrl.isNotEmpty()) {
+                    onItemClick(wikiUrl)
+                } else {
+                    android.widget.Toast.makeText(
+                        binding.root.context, 
+                        "이 항목은 상세 페이지 정보가 없습니다. (최근 스크랩 항목만 가능)", 
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

@@ -17,12 +17,11 @@
         <item name="cornerSize">12dp</item>
     </style>
 
-    <!-- 팝업용 반투명 테마 -->
-    <style name="Theme.TodayInHistory.Translucent" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
+    <!-- 잠금화면용 풀스크린 테마 -->
+    <style name="Theme.TodayInHistory.LockScreen" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 </resources>
