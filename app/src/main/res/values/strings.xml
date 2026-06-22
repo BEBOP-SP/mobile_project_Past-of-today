@@ -69,6 +69,15 @@
     <string name="signup_success">회원가입이 완료되었습니다!</string>
     <string name="signup_go_login">이미 계정이 있나요? 로그인</string>
 
+    <!-- 설정 화면 UI -->
+    <string name="settings_title">설정</string>
+    <string name="settings_user_info_label">유저 정보</string>
+    <string name="settings_nickname_label">닉네임</string>
+    <string name="settings_interests_label">관심사</string>
+    <string name="settings_btn_edit">정보 수정</string>
+    <string name="settings_btn_logout">로그아웃</string>
+    <string name="settings_logout_confirm">로그아웃 하시겠습니까?</string>
+
     <!-- 하단 네비게이션 -->
     <string name="nav_home">홈</string>
     <string name="nav_scrap">스크랩</string>

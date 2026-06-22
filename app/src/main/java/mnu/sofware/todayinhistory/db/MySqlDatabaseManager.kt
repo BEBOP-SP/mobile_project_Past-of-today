@@ -82,31 +82,24 @@ object MySqlDatabaseManager {
 
     /**
      * 사용자 닉네임과 관심사를 DB에 저장합니다.
-     * [방어적 코딩] 네트워크 오류 발생 시 false를 반환합니다.
+     * [수정] uid를 외래키처럼 활용하여 기존 유저 행의 정보를 업데이트합니다.
      */
     suspend fun saveUserPreferences(uid: String, nickname: String, interests: String): Boolean = withContext(Dispatchers.IO) {
-        val query = """
-            INSERT INTO users (uid, email, nickname, interests) 
-            VALUES (?, ?, ?, ?) 
-            ON DUPLICATE KEY UPDATE nickname = ?, interests = ?
-        """.trimIndent()
+        val query = "UPDATE users SET nickname = ?, interests = ? WHERE uid = ?"
 
         return@withContext try {
             val conn = getConnection() ?: return@withContext false
             val pstmt: PreparedStatement = conn.prepareStatement(query)
             
-            pstmt.setString(1, uid)
-            pstmt.setString(2, "${uid}@timepop.com") // 임시 이메일
-            pstmt.setString(3, nickname)
-            pstmt.setString(4, interests)
-            pstmt.setString(5, nickname)
-            pstmt.setString(6, interests)
+            pstmt.setString(1, nickname)
+            pstmt.setString(2, interests)
+            pstmt.setString(3, uid)
             
             val result = pstmt.executeUpdate()
             conn.close()
-            result > 0
+            result > 0 // 업데이트된 행이 있으면 성공
         } catch (e: Exception) {
-            Log.e("MySQL", "저장 에러: ${e.message}")
+            Log.e("MySQL", "프로필 업데이트 에러: ${e.message}")
             false
         }
     }

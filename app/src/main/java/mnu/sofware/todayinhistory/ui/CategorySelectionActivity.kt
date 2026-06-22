@@ -22,7 +22,42 @@ class CategorySelectionActivity : AppCompatActivity() {
         binding = ActivityCategorySelectionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        loadExistingData()
         initListeners()
+    }
+
+    /**
+     * [추가] 정보 수정 모드일 경우 기존 데이터를 불러와 화면에 표시합니다.
+     */
+    private fun loadExistingData() {
+        val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val nickname = sharedPref.getString("nickname", "") ?: ""
+        val interests = sharedPref.getStringSet("interests", emptySet()) ?: emptySet()
+
+        if (nickname.isNotEmpty()) {
+            binding.etNickname.setText(nickname)
+        }
+
+        if (interests.isNotEmpty()) {
+            val root = binding.root as ViewGroup
+            setSelectedChips(root, interests)
+        }
+    }
+
+    private fun setSelectedChips(viewGroup: ViewGroup, interests: Set<String>) {
+        for (i in 0 until viewGroup.childCount) {
+            val child = viewGroup.getChildAt(i)
+            if (child is ChipGroup) {
+                for (j in 0 until child.childCount) {
+                    val chip = child.getChildAt(j) as Chip
+                    if (interests.contains(chip.text.toString())) {
+                        chip.isChecked = true
+                    }
+                }
+            } else if (child is ViewGroup) {
+                setSelectedChips(child, interests)
+            }
+        }
     }
 
     private fun initListeners() {
@@ -72,15 +107,17 @@ class CategorySelectionActivity : AppCompatActivity() {
     }
 
     private fun saveToDatabaseAndStart(nickname: String, interests: List<String>) {
-        val tempUid = "user_${System.currentTimeMillis()}" // 고유 ID 생성 
+        val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        // [수정] 기존 UID가 있으면 사용하고, 없으면 새로 생성 (중복 방지)
+        val uid = sharedPref.getString("uid", null) ?: "user_${System.currentTimeMillis()}"
         val interestsString = interests.joinToString(",")
 
         lifecycleScope.launch {
-            val isSuccess = MySqlDatabaseManager.saveUserPreferences(tempUid, nickname, interestsString)
+            val isSuccess = MySqlDatabaseManager.saveUserPreferences(uid, nickname, interestsString)
             
-            saveUserDataLocally(tempUid, nickname, interests)
+            saveUserDataLocally(uid, nickname, interests)
             if (isSuccess) {
-                Toast.makeText(this@CategorySelectionActivity, "동기화 성공!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@CategorySelectionActivity, "설정이 저장되었습니다.", Toast.LENGTH_SHORT).show()
             }
             startMainActivity()
         }

@@ -69,6 +69,15 @@
     <string name="signup_success">Signup completed successfully!</string>
     <string name="signup_go_login">Already have an account? Log In</string>
 
+    <!-- Settings UI -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_user_info_label">User Information</string>
+    <string name="settings_nickname_label">Nickname</string>
+    <string name="settings_interests_label">Interests</string>
+    <string name="settings_btn_edit">Edit Info</string>
+    <string name="settings_btn_logout">Log Out</string>
+    <string name="settings_logout_confirm">Are you sure you want to log out?</string>
+
     <!-- Bottom Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_scrap">Scrap</string>
