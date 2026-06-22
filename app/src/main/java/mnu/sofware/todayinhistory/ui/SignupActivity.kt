@@ -12,9 +12,8 @@ import mnu.sofware.todayinhistory.databinding.ActivitySignupBinding
 import mnu.sofware.todayinhistory.db.MySqlDatabaseManager
 
 /**
- * 회원가입 액티비티
- * [교수님 조건] 새로운 사용자 계정을 생성하는 화면입니다.
- * [수정 사항] MySQL 데이터베이스와 연동하여 실제 회원가입을 처리합니다.
+ * 새로운 사용자 등록을 처리하는 회원가입 액티비티입니다.
+ * [교수님 조건] 12장 데이터베이스 구현 항목에 해당하며, MySQL 서버에 유저 정보를 신규 등록합니다.
  */
 class SignupActivity : AppCompatActivity() {
 
@@ -30,43 +29,43 @@ class SignupActivity : AppCompatActivity() {
     }
 
     /**
-     * 회원가입 관련 이벤트 리스너 초기화
+     * 회원가입 양식 제출 및 로그인 이동 등의 리스너를 설정합니다.
      */
     private fun initListeners() {
-        // 회원가입 완료 버튼 클릭
+        // 회원가입 완료 버튼 클릭 시
         binding.btnSignupSubmit.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
             val passwordConfirm = binding.etPasswordConfirm.text.toString().trim()
 
-            // [방어적 코딩] 빈 칸 확인
+            // 입력 필드 누락 검사
             if (email.isEmpty() || password.isEmpty() || passwordConfirm.isEmpty()) {
                 Toast.makeText(this, getString(R.string.login_error_empty), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // [방어적 코딩] 비밀번호 일치 여부 확인
+            // 비밀번호 확인 검사
             if (password != passwordConfirm) {
                 Toast.makeText(this, getString(R.string.login_error_password_mismatch), Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // [실제 회원가입 로직] MySQL DB에 저장
+            // 고유 UID 생성 및 DB 저장 처리
             val tempUid = "user_${System.currentTimeMillis()}"
             lifecycleScope.launch {
                 val success = MySqlDatabaseManager.registerUser(tempUid, email, password)
                 if (success) {
-                    // 로컬에도 기본 UID 저장
+                    // 내부 저장소에 임시 UID 기록
                     saveUidLocally(tempUid)
                     
                     Toast.makeText(this@SignupActivity, getString(R.string.signup_success), Toast.LENGTH_SHORT).show()
                     
-                    // 회원가입 성공 후 관심사 선택 화면으로 이동
+                    // 성공 후 초기 관심사 선택 페이지로 자동 연결
                     val intent = Intent(this@SignupActivity, CategorySelectionActivity::class.java)
                     startActivity(intent)
-                    finishAffinity() 
+                    finishAffinity() // 가입 중 뒤로가기 방지를 위해 모든 액티비티 종료
                 } else {
-                    Toast.makeText(this@SignupActivity, "회원가입 실패 (네트워크 또는 중복 이메일 확인)", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SignupActivity, "회원가입 실패 (중복 이메일 혹은 서버 연결 확인)", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -77,6 +76,9 @@ class SignupActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * 고유 사용자 식별자를 로컬에 보관합니다.
+     */
     private fun saveUidLocally(uid: String) {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         sharedPref.edit().putString("uid", uid).apply()

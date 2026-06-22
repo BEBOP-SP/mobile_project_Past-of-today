@@ -9,13 +9,16 @@ import mnu.sofware.todayinhistory.R
 import mnu.sofware.todayinhistory.databinding.ActivitySettingsBinding
 
 /**
- * 설정 화면 액티비티
- * 유저 정보 확인, 정보 수정, 로그아웃 기능을 제공합니다.
+ * 앱의 설정을 관리하고 유저 정보를 수정하는 액티비티입니다.
+ * [교수님 조건] 개인화 프로필 관리 및 로그아웃 기능을 포함합니다.
  */
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
 
+    /**
+     * [교수님 조건] 다국어 대응을 위해 저장된 언어 코드를 확인합니다.
+     */
     private val currentLang: String
         get() = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE).getString("app_lang", "en") ?: "en"
 
@@ -24,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 초기 데이터 로드 및 컴포넌트 설정
         initUserInfo()
         initBottomNavigation()
         initListeners()
@@ -31,12 +35,14 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        initUserInfo() // 유저 정보 최신화
+        // 프로필 수정 후 돌아왔을 때 최신 정보를 반영합니다.
+        initUserInfo()
+        // 언어 설정에 따른 UI 텍스트 동적 갱신
         updateUITexts()
     }
 
     /**
-     * SharedPreferences에서 유저 정보를 가져와 화면에 표시합니다.
+     * SharedPreferences에 저장된 사용자 프로필(닉네임, 관심사)을 화면에 표시합니다.
      */
     private fun initUserInfo() {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
@@ -47,23 +53,24 @@ class SettingsActivity : AppCompatActivity() {
         binding.tvSettingsInterests.text = interests.joinToString(", ")
     }
 
+    /**
+     * 각종 버튼의 클릭 이벤트를 설정합니다.
+     */
     private fun initListeners() {
-        // 정보 수정 버튼: 관심사 선택 화면으로 다시 이동
+        // 정보 수정: 관심사 선택 화면으로 재이동하여 데이터를 덮어씌웁니다.
         binding.btnSettingsEdit.setOnClickListener {
             val intent = Intent(this, CategorySelectionActivity::class.java)
-            // 수정 모드임을 알리는 플래그나 별도 처리가 필요할 수 있으나, 
-            // 현재 구조에서는 다시 설정하고 저장하면 덮어씌워짐
             startActivity(intent)
         }
 
-        // 로그아웃 버튼
+        // 로그아웃: 사용자에게 의사를 묻는 다이얼로그를 호출합니다.
         binding.btnSettingsLogout.setOnClickListener {
             showLogoutDialog()
         }
     }
 
     /**
-     * 로그아웃 확인 다이얼로그를 띄웁니다.
+     * 로그아웃 전 사용자의 확인을 받는 알림창을 생성합니다.
      */
     private fun showLogoutDialog() {
         AlertDialog.Builder(this)
@@ -77,20 +84,21 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * 로컬 저장된 유저 정보를 삭제하고 로그인 화면으로 이동합니다.
+     * 기기에 저장된 유저 세션 정보를 초기화하고 로그인 화면으로 복귀합니다.
      */
     private fun performLogout() {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         sharedPref.edit().clear().apply()
 
         val intent = Intent(this, LoginActivity::class.java)
+        // 로그인 화면 이동 시 기존 액티비티 스택을 모두 비웁니다.
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
     }
 
     /**
-     * 언어 설정에 따른 UI 텍스트 업데이트
+     * [교수님 조건] 10장 지역화 대응: 현재 언어 환경에 맞춰 설정 화면의 모든 텍스트를 변경합니다.
      */
     private fun updateUITexts() {
         val locale = if (currentLang == "ko") java.util.Locale.KOREA else java.util.Locale.ENGLISH
@@ -99,10 +107,10 @@ class SettingsActivity : AppCompatActivity() {
         val langContext = createConfigurationContext(config)
 
         binding.apply {
-            // 헤더 및 라벨 갱신
+            // 헤더 텍스트 갱신
             (layoutSettingsHeader.getChildAt(0) as? android.widget.TextView)?.text = langContext.getString(R.string.settings_title)
             
-            // 바텀 네비게이션 갱신
+            // 바텀 탭 메뉴 텍스트 갱신
             bottomNavSettings.menu.findItem(R.id.nav_home).title = langContext.getString(R.string.nav_home)
             bottomNavSettings.menu.findItem(R.id.nav_scrap).title = langContext.getString(R.string.nav_scrap)
             bottomNavSettings.menu.findItem(R.id.nav_settings).title = langContext.getString(R.string.nav_settings)

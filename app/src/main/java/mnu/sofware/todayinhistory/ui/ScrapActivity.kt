@@ -16,8 +16,8 @@ import mnu.sofware.todayinhistory.databinding.ActivityScrapBinding
 import mnu.sofware.todayinhistory.db.MySqlDatabaseManager
 
 /**
- * 사용자가 스크랩한 사건 목록을 보여주는 화면입니다.
- * [교수님 조건] 데이터베이스(MySQL) 연동 및 리사이클러뷰 구현.
+ * 사용자가 보관함(Scrap)에 저장한 역사적 사건 목록을 관리하는 화면입니다.
+ * [교수님 조건] 8장 리사이클러뷰 및 12장 MySQL 데이터베이스 연동 항목을 준수합니다.
  */
 class ScrapActivity : AppCompatActivity() {
 
@@ -25,7 +25,7 @@ class ScrapActivity : AppCompatActivity() {
     private lateinit var scrapAdapter: ScrapAdapter
 
     /**
-     * [교수님 조건] 언어 설정을 유지하기 위해 SharedPreferences를 사용합니다.
+     * [교수님 조건] 다국어 대응을 위해 현재 언어 설정을 기기에서 가져옵니다.
      */
     private val currentLang: String
         get() = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE).getString("app_lang", "en") ?: "en"
@@ -37,16 +37,18 @@ class ScrapActivity : AppCompatActivity() {
 
         initRecyclerView()
         initBottomNavigation()
+        // DB에서 저장된 데이터를 비동기로 불러와 화면에 표시합니다.
         loadScrappedEvents()
     }
 
     override fun onResume() {
         super.onResume()
+        // 타 화면 이동 후 복귀 시 최신 언어 설정에 맞춰 UI 고정 텍스트를 갱신합니다.
         updateUITexts()
     }
 
     /**
-     * 현재 언어 설정에 맞춰 UI 텍스트들을 갱신합니다.
+     * [교수님 조건] 10장 지역화: 현재 선택된 언어에 맞춰 헤더 및 메시지를 실시간 변경합니다.
      */
     private fun updateUITexts() {
         val locale = if (currentLang == "ko") java.util.Locale.KOREA else java.util.Locale.ENGLISH
@@ -55,36 +57,33 @@ class ScrapActivity : AppCompatActivity() {
         val langContext = createConfigurationContext(config)
 
         binding.apply {
-            // 헤더 타이틀 갱신
             (layoutScrapHeader.getChildAt(0) as? android.widget.TextView)?.text = langContext.getString(R.string.scrap_title)
-            
-            // 빈 상태 메시지 갱신
             (layoutEmptyScrap.getChildAt(1) as? android.widget.TextView)?.text = langContext.getString(R.string.scrap_empty_msg)
 
-            // 바텀 네비게이션 갱신
             bottomNavScrap.menu.findItem(R.id.nav_home).title = langContext.getString(R.string.nav_home)
             bottomNavScrap.menu.findItem(R.id.nav_scrap).title = langContext.getString(R.string.nav_scrap)
             bottomNavScrap.menu.findItem(R.id.nav_settings).title = langContext.getString(R.string.nav_settings)
         }
     }
 
+    /**
+     * 보관함 리스트를 위한 리사이클러뷰와 어댑터를 초기화합니다.
+     */
     private fun initRecyclerView() {
         scrapAdapter = ScrapAdapter(
             onDeleteClick = { scrapId ->
+                // 삭제 아이콘 클릭 시 DB에서 데이터 삭제 요청
                 deleteScrap(scrapId)
             },
             onItemClick = { wikiUrl ->
-                // [수정] 한국어 모드일 경우 한국어 위키피디아 존재 여부 확인 후 이동
+                // 항목 클릭 시 관련 위키백과 상세 페이지로 이동 (언어 지능형 폴백 적용)
                 lifecycleScope.launch {
                     var targetUrl = wikiUrl
                     
-                    // 영어 위키 주소이고 현재 한국어 설정인 경우
                     if (currentLang == "ko" && wikiUrl.contains("en.wikipedia.org")) {
                         val enTitle = wikiUrl.substringAfterLast("/")
                         val koUrl = mnu.sofware.todayinhistory.api.TranslationManager.getKoreanWikipediaUrl(enTitle)
-                        if (koUrl != null) {
-                            targetUrl = koUrl
-                        }
+                        if (koUrl != null) targetUrl = koUrl
                     }
 
                     try {
@@ -102,15 +101,11 @@ class ScrapActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 하단 네비게이션 설정
-     */
     private fun initBottomNavigation() {
         binding.bottomNavScrap.selectedItemId = R.id.nav_scrap
         binding.bottomNavScrap.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    // 메인 화면으로 이동 (기존 인스턴스가 있다면 재사용)
                     val intent = Intent(this, MainActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     startActivity(intent)
@@ -120,7 +115,6 @@ class ScrapActivity : AppCompatActivity() {
                 }
                 R.id.nav_scrap -> true
                 R.id.nav_settings -> {
-                    // 설정 화면으로 이동
                     val intent = Intent(this, SettingsActivity::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     startActivity(intent)
@@ -134,7 +128,7 @@ class ScrapActivity : AppCompatActivity() {
     }
 
     /**
-     * DB에서 스크랩 목록을 불러옵니다.
+     * 외부 MySQL 데이터베이스로부터 현재 사용자의 스크랩 목록을 조회합니다.
      */
     private fun loadScrappedEvents() {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
@@ -154,16 +148,16 @@ class ScrapActivity : AppCompatActivity() {
     }
 
     /**
-     * 선택한 스크랩을 삭제합니다.
+     * 데이터베이스에서 특정 스크랩 항목을 물리적으로 제거합니다.
      */
     private fun deleteScrap(scrapId: Int) {
         lifecycleScope.launch {
             val success = MySqlDatabaseManager.deleteScrap(scrapId)
             if (success) {
-                Toast.makeText(this@ScrapActivity, "삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                loadScrappedEvents() // 리스트 새로고침
+                Toast.makeText(this@ScrapActivity, "데이터가 성공적으로 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                loadScrappedEvents() // 리스트 즉시 갱신
             } else {
-                Toast.makeText(this@ScrapActivity, "삭제 실패", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ScrapActivity, "삭제 실패 (네트워크를 확인해 주세요)", Toast.LENGTH_SHORT).show()
             }
         }
     }
