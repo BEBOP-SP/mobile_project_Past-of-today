@@ -19,41 +19,62 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- 로고 및 제목 -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_launcher_foreground"
-                    app:tint="#D4A017" /> <!-- 모래시계 아이콘 대신 임시 -->
+            <!-- 로고 및 제목 + 언어 버튼 -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_alignParentStart="true">
 
-                    <TextView
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_launcher_foreground"
+                        app:tint="#D4A017" />
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/main_header_title"
-                        android:textColor="#333333"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="8dp"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/main_header_subtitle"
-                        android:textColor="#999999"
-                        android:textSize="12sp" />
+                        <TextView
+                            android:id="@+id/tv_main_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/main_header_title"
+                            android:textColor="#333333"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_main_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/main_header_subtitle"
+                            android:textColor="#999999"
+                            android:textSize="12sp" />
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
+
+                <!-- 언어 전환 버튼 -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_language_toggle"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="EN"
+                    android:textSize="12sp"
+                    app:cornerRadius="20dp"
+                    app:iconSize="16dp" />
+            </RelativeLayout>
 
             <!-- 인사말 -->
             <TextView
@@ -61,13 +82,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="안녕하세요, 지민님!\n당신의 오늘을 발견해보세요."
+                android:text="안녕하세요!"
                 android:textColor="#333333"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
             <!-- 섹션 1: 관심사 맞춤 -->
             <TextView
+                android:id="@+id/tv_section_interest"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -87,6 +109,7 @@
 
             <!-- 섹션 2: 새로운 발견 -->
             <TextView
+                android:id="@+id/tv_section_discovery"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -115,5 +138,31 @@
         android:background="#F9F9F9"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_nav_menu" />
+
+    <!-- 로딩 화면 레이아웃 -->
+    <LinearLayout
+        android:id="@+id/layout_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/purple_500" />
+
+        <TextView
+            android:id="@+id/tv_loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/main_loading"
+            android:textColor="@color/black"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
